@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-int main() {
+int renamed_main() {
     const char *str1 = "/home/dedeepya/Desktop/3rdsem/OSN/MP_1/PART_B/hello/hello/hello";
     const char *str2 = "/home/dedeepya/Desktop/3rd sem/OSN/MP_1/PART_B";
 

@@ -62,24 +62,3 @@ void bring_to_foreground(pid_t pid) {
         printf("Process [%d] stopped\n", pid);
     }
 }
-
-// Example main function to simulate running a command in the foreground
-int main() {
-    // Initialize shell to control the terminal
-    initialize_shell();
-
-    // Simulate creating a child process
-    pid_t pid = fork();
-    if (pid == 0) {
-        // Child process: simulate a command (sleep for 5 seconds)
-        execlp("sleep", "sleep", "5", NULL);
-    } else {
-        // Parent process: bring the child process to the foreground
-        bring_to_foreground(pid);
-
-        // After the foreground process completes, the shell regains control
-        printf("Shell regained control\n");
-    }
-
-    return 0;
-}

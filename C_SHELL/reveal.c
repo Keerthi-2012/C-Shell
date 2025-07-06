@@ -3,6 +3,11 @@
 #include <string.h>
 #include <ctype.h>
 
+
+// struct dirent {
+//     ino_t d_ino;               // inode number (unique ID of file)
+//     char  d_name[NAME_MAX+1];  // name of file/directory (null-terminated string)
+// };
 int compare_names(const void *a, const void *b)
 {
     struct dirent *d1 = *(struct dirent **)a;
@@ -11,9 +16,9 @@ int compare_names(const void *a, const void *b)
 }
 void reveal_permissions(char *directory, int a_flag)
 {
-    struct dirent **entries;
+    struct dirent **entries; //struct dirent holds basic information about a file or subdirectory while reading the contents of a folder, such as its name.
     int count = 0;
-    DIR *dir = opendir(directory);
+    DIR *dir = opendir(directory);//opens directory
 
     if (dir == NULL)
     {
@@ -30,7 +35,9 @@ void reveal_permissions(char *directory, int a_flag)
 
     // Allocate memory for the array of entries
     entries = (struct dirent **)malloc(count * sizeof(struct dirent *));
-    rewinddir(dir);
+    rewinddir(dir);//rewinddir() is a POSIX function that resets the position of the directory stream back to the beginning of the directory.
+    // Going back to the beginning of the directory
+
 
     // Store entries in the array
     int i = 0;
@@ -52,8 +59,11 @@ void reveal_permissions(char *directory, int a_flag)
         char filepath[1024];
         // construct file path by concatenating directory and file name
         snprintf(filepath, sizeof(filepath), "%s/%s", directory, entries[i]->d_name);
+        
+        //Gets file metadata
         struct stat fileStat;
 
+        //If it fails (file doesn’t exist, bad path), print error and skip.
         if (stat(filepath, &fileStat) < 0)
         {
             perror("\033[0;31m stat \033[0");
@@ -61,15 +71,17 @@ void reveal_permissions(char *directory, int a_flag)
         }
 
         print_permissions(&fileStat);
-        printf("%lu ", fileStat.st_nlink);
+        printf(" %lu ", fileStat.st_nlink);//Print number of hard links to the file.
 
         struct passwd *pw = getpwuid(fileStat.st_uid);
-        printf("\t%s ", pw->pw_name);
+        printf("\t%s ", pw->pw_name);//Get and print username of file owner.
 
         struct group *gr = getgrgid(fileStat.st_gid);
-        printf("\t%s ", gr->gr_name);
+        printf("\t%s ", gr->gr_name);//Get and print group name of the file.
 
-        printf("\t%5ld ", fileStat.st_size);
+        printf("\t%5ld ", fileStat.st_size);//Print file size in bytes.
+        
+        //Convert last modification time to human-readable format like Jul 06 15:30
         char timebuf[64];
         strftime(timebuf, sizeof(timebuf), "%b %d %H:%M", localtime(&fileStat.st_mtime));
         printf("\t%s\t", timebuf);
@@ -77,11 +89,11 @@ void reveal_permissions(char *directory, int a_flag)
         // set the color by the type of file
         if (S_ISDIR(fileStat.st_mode)) // is directory
         {
-            printf("\033[0;34m");
+            printf("\033[0;32m");
         }
         else if (S_ISREG(fileStat.st_mode) && (fileStat.st_mode & S_IXUSR)) // is an executable
         {
-            printf("\033[0;32m");
+            printf("\033[0;33m");
         }
         else if (S_ISREG(fileStat.st_mode)) // is a normal file
         {
@@ -144,11 +156,11 @@ void reveal_(char *directory, int a_flag)
         // set color acc to type of file
         if (S_ISDIR(fileStat.st_mode)) // is directory
         {
-            printf("\033[0;34m");
+            printf("\033[0;32m");
         }
         else if (S_ISREG(fileStat.st_mode) && (fileStat.st_mode & S_IXUSR)) // is an executable file
         {
-            printf("\033[0;32m");
+            printf("\033[0;33m");
         }
         else if (S_ISREG(fileStat.st_mode)) // is a file
         {
@@ -165,22 +177,27 @@ void reveal_(char *directory, int a_flag)
 
 void print_permissions(struct stat *fileStat)
 {
-    printf((S_ISDIR(fileStat->st_mode)) ? "d" : "-");
-    printf((fileStat->st_mode & S_IRUSR) ? "r" : "-");
-    printf((fileStat->st_mode & S_IWUSR) ? "w" : "-");
-    printf((fileStat->st_mode & S_IXUSR) ? "x" : "-");
-    printf((fileStat->st_mode & S_IRGRP) ? "r" : "-");
-    printf((fileStat->st_mode & S_IWGRP) ? "w" : "-");
-    printf((fileStat->st_mode & S_IXGRP) ? "x" : "-");
-    printf((fileStat->st_mode & S_IROTH) ? "r" : "-");
-    printf((fileStat->st_mode & S_IWOTH) ? "w" : "-");
-    printf((fileStat->st_mode & S_IXOTH) ? "x" : "-");
+    printf((S_ISDIR(fileStat->st_mode)) ? "d" : "-");     // Is it a directory?
+
+    printf((fileStat->st_mode & S_IRUSR) ? "r" : "-");     // Owner read
+    printf((fileStat->st_mode & S_IWUSR) ? "w" : "-");     // Owner write
+    printf((fileStat->st_mode & S_IXUSR) ? "x" : "-");     // Owner execute
+
+    printf((fileStat->st_mode & S_IRGRP) ? "r" : "-");     // Group read
+    printf((fileStat->st_mode & S_IWGRP) ? "w" : "-");     // Group write
+    printf((fileStat->st_mode & S_IXGRP) ? "x" : "-");     // Group execute
+
+    printf((fileStat->st_mode & S_IROTH) ? "r" : "-");     // Others read
+    printf((fileStat->st_mode & S_IWOTH) ? "w" : "-");     // Others write
+    printf((fileStat->st_mode & S_IXOTH) ? "x" : "-");     // Others execute
 }
+
+char prev_dir[buf_size] = "";
 
 void reveal_fun(char *cmd, char *home_dir)
 {
     char *token = (char *)malloc(sizeof(char) * buf_size);
-    int a_flag = 0, l_flag = 0;
+    int a_flag = 0, l_flag = 0, dash_flag = 0;
     token = strtok(cmd, " \t");
     char *directory = (char *)malloc(sizeof(char) * buf_size);
     strcpy(directory, "");
@@ -191,7 +208,11 @@ void reveal_fun(char *cmd, char *home_dir)
             token = strtok(NULL, " \t");
             continue;
         }
-        if (strstr(token, "-")) // if the token contains information about flag
+        if (strcmp(token, "-") == 0)
+        {
+            dash_flag = 1;
+        }
+        else if (strstr(token, "-")) // if the token contains information about flag
         {
             for (int i = 0; i < strlen(token); i++)
             {
@@ -208,6 +229,23 @@ void reveal_fun(char *cmd, char *home_dir)
         token = strtok(NULL, " \t");
     }
     directory[strlen(directory)] = '\0';
+
+    char cwd[buf_size];
+    getcwd(cwd, sizeof(cwd));  // Save current directory
+
+    if (dash_flag)
+    {
+        if (strlen(prev_dir) == 0)
+        {
+            fprintf(stderr, "reveal: OLDPWD not set\n");
+            free(token);
+            free(directory);
+            return;
+        }
+        strcpy(directory, prev_dir);
+        printf("%s\n", directory);  // Like how `cd -` prints previous dir
+    }
+
     char *absolute_path = (char *)malloc(sizeof(char) * buf_size); // construct absolute path
     int flag = 0;
     if (directory[0] == '~') // relative path from home dir
@@ -265,6 +303,7 @@ void reveal_fun(char *cmd, char *home_dir)
     {
         reveal_(absolute_path, a_flag); // prints the fails/directories in the given path
     }
+    strcpy(prev_dir, cwd);
     free(token);
     free(directory);
     free(absolute_path);

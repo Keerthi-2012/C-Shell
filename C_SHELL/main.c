@@ -15,7 +15,7 @@
 #include "neonate.h"
 #include "systemCommands.h"
 #include "shrc.h"
-#define buf_size1 4096
+#define buf_size1 4096 //specifies the size of the buffer used for reading user input in the shell
 
 void printProcessList()
 {
@@ -145,7 +145,7 @@ int main()
         }
         trimWhitespaces(input);             // remove whitespaces to get clean command
         input[strcspn(input, "\n")] = '\0'; // replace the new line character by null character
-        if (strcmp(input, "bye") == 0)      // to exit from this duplicate C shell
+        if (strcmp(input, "ciao") == 0)      // to exit from this duplicate C shell
         {
             break;
         }

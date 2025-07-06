@@ -39,44 +39,38 @@ void print_The_Directory(char *home_dir)
     }
     char *rel_dir = (char *)malloc(sizeof(char) * buf_size);
 
-    // if the present directory is not the home directory -> parent directories of home directory
-    // show absolute path of that
-    // homedir = /home/JohnDoe/Project
-    // dir = /home/JohnDoe/
-    if (strcmp(home_dir, dir) > 0)
+    if (strncmp(dir, home_dir, strlen(home_dir)) == 0)
     {
-        printf("1%s\n", dir);
-        strcpy(rel_dir, dir);
-    }
-    // if the present directory is present in homedirectory -> scrape home directory from that path
-    // scrape home dir from dir
-    // homedir = /home/JohnDoe/
-    // dir = /home/JohnDoe/Project
-    if (strcmp(home_dir, dir) < 0)
-    {
-        x = strlen(home_dir);
-        strcpy(rel_dir, dir + x);
-    }
-    // if it is the home directory represent it by ~
-    if (strcmp(home_dir, dir) == 0)
-    {
-        strcpy(rel_dir, "~");
-    }
-    printf("\033[1;32m");
-    printf("<%s@%s", user_name, os.nodename);
-    printf("\033[1;37m:~");
-    if (strcmp(rel_dir, "~") != 0) // just to account for different orders in two cases
-        printf("%s ", rel_dir);
-    if (flag == 1)
-    {
-        fgets(line, buf_size, fp);
-        printf(":%s> ", line); // the name of process that took more than 2 secs
-        fclose(fp);
-        fp = fopen(filename, "w");
+        if (strlen(dir) == strlen(home_dir))
+        {
+            strcpy(rel_dir, "~");
+        }
+        else
+        {
+            sprintf(rel_dir, "~%s", dir + strlen(home_dir));
+        }
     }
     else
     {
-        printf("> ");
+        strcpy(rel_dir, dir); // absolute path
     }
-    printf("\033[0m");
+
+    // Optional: handle the process that took >2s
+    char *test_file = (char *)malloc(sizeof(char) * buf_size);
+    sprintf(test_file, "%s/test.txt", home_dir);
+    if (fp && fgets(line, buf_size, fp) && strcmp(line, "1\n") == 0)
+    {
+        flag = 1;
+    }
+
+    // Printing prompt
+    printf("\033[0;35m<%s@%s", user_name, os.nodename);
+    printf("\033[0;33m:%s", rel_dir);
+    if (flag && fgets(line, buf_size, fp))
+    {
+        printf(":%s", line);
+        fclose(fp);
+        fp = fopen(test_file, "w");
+    }
+    printf("> \033[0m");
 }
