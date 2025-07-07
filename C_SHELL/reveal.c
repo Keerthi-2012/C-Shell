@@ -89,11 +89,11 @@ void reveal_permissions(char *directory, int a_flag)
         // set the color by the type of file
         if (S_ISDIR(fileStat.st_mode)) // is directory
         {
-            printf("\033[0;32m");
+            printf("\033[0;34m");
         }
         else if (S_ISREG(fileStat.st_mode) && (fileStat.st_mode & S_IXUSR)) // is an executable
         {
-            printf("\033[0;33m");
+            printf("\033[0;32m");
         }
         else if (S_ISREG(fileStat.st_mode)) // is a normal file
         {
@@ -156,11 +156,11 @@ void reveal_(char *directory, int a_flag)
         // set color acc to type of file
         if (S_ISDIR(fileStat.st_mode)) // is directory
         {
-            printf("\033[0;32m");
+            printf("\033[0;34m");
         }
         else if (S_ISREG(fileStat.st_mode) && (fileStat.st_mode & S_IXUSR)) // is an executable file
         {
-            printf("\033[0;33m");
+            printf("\033[0;32m");
         }
         else if (S_ISREG(fileStat.st_mode)) // is a file
         {

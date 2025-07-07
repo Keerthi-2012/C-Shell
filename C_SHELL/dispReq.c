@@ -23,9 +23,16 @@ void print_The_Directory(char *home_dir)
     struct utsname os; // a struct used to store information about operating system and machine
     int x = 0;
     int flag = 0;
-    getlogin_r(user_name, buf_size); // gets the username logged into os and stores in user_name
-    getcwd(dir, buf_size);           // gets current working directory and stores in dir variable
-    uname(&os);                      // fills the details of os in os struct
+    if (getlogin_r(user_name, buf_size) != 0)
+    {
+        char *env_user = getenv("USER");
+        if (env_user)
+            strncpy(user_name, env_user, buf_size);
+        else
+            strcpy(user_name, "user"); // last resort
+    } // gets the username logged into os and stores in user_name
+    getcwd(dir, buf_size); // gets current working directory and stores in dir variable
+    uname(&os);            // fills the details of os in os struct
 
     char *filename = (char *)malloc(sizeof(char) * buf_size);
     strcpy(filename, home_dir);
@@ -64,7 +71,7 @@ void print_The_Directory(char *home_dir)
     }
 
     // Printing prompt
-    printf("\033[0;35m<%s@%s", user_name, os.nodename);
+    printf("\033[0;35m<%s@%s", user_name, os.sysname);
     printf("\033[0;33m:%s", rel_dir);
     if (flag && fgets(line, buf_size, fp))
     {

@@ -34,6 +34,7 @@ int getProcloreID(char *command)
         if (i == 1)
         {
             num = atoi(token1);
+            break;
         }
         token1 = strtok(NULL, " \t");
         i++;
@@ -99,7 +100,9 @@ void dividingCommands(char *input, char *home_dir, char *filename, char *previou
                 }
             }
             else
+            {
                 background_process(command);
+            }
             strcpy(command, "");
         }
         else if (strcmp(token, ";") == 0) // if all the processes are to be run in foreground
@@ -251,34 +254,6 @@ void dividingCommands(char *input, char *home_dir, char *filename, char *previou
             {
                 neonate(command);
             }
-            // else if (strncmp(command, "cd", 2) == 0 || strncmp(command, "go", 2) == 0)
-            // {
-            //     char *path = command + 3; // move past "cd " (assumes a space after cd)
-            //     trimWhitespaces(path);
-            //     getcwd(previous_directory, buf_size); // save current directory before changing
-
-            //     if (strcmp(path, "") == 0 || strcmp(path, "~") == 0)
-            //     {
-            //         chdir(home_dir);
-            //     }
-            //     else if (strcmp(path, "-") == 0)
-            //     {
-            //         printf("%s\n", previous_directory);
-            //         chdir(previous_directory);
-            //     }
-            //     else
-            //     {
-            //         if (chdir(path) != 0)
-            //         {
-            //             // Use "cd" or "go" based on input command
-            //             if (strncmp(command, "cd", 2) == 0)
-            //                 perror("cd failed");
-            //             else
-            //                 perror("go failed");
-            //         }
-            //     }
-            // }
-
             else
             {
                 foreground_process(command, home_dir);

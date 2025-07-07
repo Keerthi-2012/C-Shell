@@ -61,15 +61,17 @@ void handle_sigchld(int sig)
         }
     }
 }
-
+// A foreground process runs directly under user control — the shell waits for it to finish before accepting another command.
+// A background process is started by adding & at the end. Shell doesn't wait — it keeps taking new commands while the process runs.
 void background_process(char *command)
 {
+    //This sets up a signal handler for a signal — probably SIGCHLD (which is sent when a child process terminates or stops).
     // registers a sigchild handler
-    struct sigaction sa;
-    sa.sa_handler = &handle_sigchld; // attaches handler function
-    sigemptyset(&sa.sa_mask);
+    struct sigaction sa;//	Declare a signal action structure
+    sa.sa_handler = &handle_sigchld; // Assign the function to handle the signal
+    sigemptyset(&sa.sa_mask);//Register this handler for the SIGCHLD signal
     sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
-
+    
     if (sigaction(SIGCHLD, &sa, 0) == -1)
     {
         perror("\033[0;31m Error in sigaction \033[0;31m");
@@ -101,16 +103,18 @@ void foreground_process(char *command, char *home_dir)
 {
     time_t start_time, end_time;
     int child = fork();
-    if (child < 0)
+    if (child < 0)//fork failed
     {
         perror("\033[0;31m Error in creating a child \033[0\n");
     }
 
     if (child > 0)
     {
+        // printf("Child PID: %d\n", child);
         // ignore these signals
-        signal(SIGTTIN, SIG_IGN), signal(SIGTTOU, SIG_IGN);
-        setpgid(child, getpgid(0));           // sets the child process in same group as shell
+        //If the shell try to read/write the terminal while in background, just ignore the attempt, don’t suspend the terminal
+        signal(SIGTTIN, SIG_IGN), signal(SIGTTOU, SIG_IGN);//SIGTTIN (Signal Terminal Input) and signal terminal output 
+        setpgid(child, getpgid(0));           // sets the child process in same group as shell-Places child in the shell’s process group. (For unified job control.)
         tcsetpgrp(0, child);                  // gives the terminal control to the child
         appendProcessList(command, child, 1); // add the process to activities list
         curr_running = child;                 // update current running fg process
@@ -119,7 +123,7 @@ void foreground_process(char *command, char *home_dir)
         waitpid(child, &status, WUNTRACED);                 // parent waits until child is done
         tcsetpgrp(0, getpgid(0));                           // gives back the terminal control to shell
         signal(SIGTTIN, SIG_DFL), signal(SIGTTOU, SIG_DFL); // set the signals to default behavior
-        curr_running = -1;                                  // remove the current running process
+        curr_running = -1;                                  // clear current running process
         end_time = time(NULL);                              // note down the end time
         int time_taken = (int)(end_time - start_time);      // find the time taken by the foreground process
         char filename1[buf_size];
@@ -142,10 +146,15 @@ void foreground_process(char *command, char *home_dir)
     }
     else if (child == 0)
     {
-        setpgid(0, 0);
-        execl("/bin/sh", "sh", "-c", command, (char *)(NULL));
+        // printf("Child PID: %d\n", child);
+        setpgid(0, 0);//The child makes itself leader of its own process group.
+        execl("/bin/sh", "sh", "-c", command, (char *)(NULL));//execl replaces the child process with sh -c "sleep 5", which executes the command.
         // execute the command
         perror("execvp failed");
         exit(1);
     }
 }
+
+//The process is split into two:
+// Parent: The shell process
+// Child: Executes the command

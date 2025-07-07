@@ -101,8 +101,8 @@ void logMoreThan15(const char *logFilename, char *input)
 void log_Write(char *input, char *logFilename)
 {
     // initialisation
-    int fd = open(logFilename, O_RDWR | O_APPEND, 0644); // open the log file in read/append mode // 0644: File permissions - rw-r--r-- Owner: read + write (6) Group: read (4)  Others: read (4)
-    char *line = (char *)malloc(sizeof(char) * buf_size);// to read each line from the log file
+    int fd = open(logFilename, O_RDWR | O_APPEND, 0644);  // open the log file in read/append mode // 0644: File permissions - rw-r--r-- Owner: read + write (6) Group: read (4)  Others: read (4)
+    char *line = (char *)malloc(sizeof(char) * buf_size); // to read each line from the log file
     char *latest_command = (char *)malloc(sizeof(char) * buf_size);
     strcpy(latest_command, "");
     FILE *fp = fopen(logFilename, "r");
@@ -121,29 +121,29 @@ void log_Write(char *input, char *logFilename)
     if (strlen(input) == 0)
         return;
 
-    if (strcmp(input, latest_command) == 0) {
+    if (strcmp(input, latest_command) == 0)
+    {
         free(line);
         free(latest_command);
         close(fd);
         return;
     }
-    
+
     // if present command is not the same as previous command and
     // number of instructions is less than 15 and instruction does not contain log
-    bool isPureLogCommand = (
-        strcmp(input, "log") == 0 ||
-        strncmp(input, "log execute", 11) == 0 ||
-        strncmp(input, "log purge", 9) == 0
-    );
+    bool isPureLogCommand = strstr(input, "log") != NULL;
 
-    if (!isPureLogCommand && strlen(input) > 0 && count < 15)
+    if (!isPureLogCommand && strlen(input) > 0)
     {
-        write(fd, input, strlen(input));
-        write(fd, "\n", 1);
-    }
-    else if (!isPureLogCommand && count >= 15)
-    {
-        logMoreThan15(logFilename, input);
+        if (count < 15)
+        {
+            write(fd, input, strlen(input));
+            write(fd, "\n", 1);
+        }
+        else
+        {
+            logMoreThan15(logFilename, input);
+        }
     }
 
     free(line);
