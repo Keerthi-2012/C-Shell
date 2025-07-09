@@ -29,7 +29,7 @@ void fetch_man_page(char *input)
     char path[100];
     snprintf(path, sizeof(path), "/?topic=%s&section=all", command);
 
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);//(Address family, Type of socket, Protocol)-“Hey, I want to create a TCP socket that uses IPv4 addressing.” to OS
     if (sockfd < 0)
     {
         perror("Socket creation failed");
@@ -43,12 +43,12 @@ void fetch_man_page(char *input)
         exit(EXIT_FAILURE);
     }
 
-    memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    memcpy(&server_addr.sin_addr.s_addr, server->h_addr_list[0], server->h_length);
-    server_addr.sin_port = htons(80);
+    memset(&server_addr, 0, sizeof(server_addr));//Initializes the entire server_addr structure to zeros to avoid garbage values.
+    server_addr.sin_family = AF_INET;//Specifies the address family: AF_INET means IPv4. Required for IPv4 socket communication.
+    memcpy(&server_addr.sin_addr.s_addr, server->h_addr_list[0], server->h_length);//Copy IP address from DNS result into socket structure
+    server_addr.sin_port = htons(80);//Set port number to 80 for HTTP (with correct byte order)
 
-    if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
+    if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)//initiates the TCP connection to the web server
     {
         perror("Connection failed");
         exit(EXIT_FAILURE);
@@ -76,7 +76,7 @@ void fetch_man_page(char *input)
             strcpy(body_start, header_end + 2);
         }
         char *current_pos = body_start;
-        while ((tag_start = strchr(current_pos, '<')) != NULL)
+        while ((tag_start = strchr(current_pos, '<')) != NULL)// Text between tags is printed. Tags are skipped. Any remaining trailing content is also printed
         {
             if (tag_start > current_pos)
             {

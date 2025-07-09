@@ -17,8 +17,19 @@
 #include "shrc.h"
 #define buf_size1 4096 //specifies the size of the buffer used for reading user input in the shell
 
+int compare_here(const void *a, const void *b)
+{
+    Activities *p1 = (Activities *)a;
+    Activities *p2 = (Activities *)b;
+    return strcmp(p1->processName, p2->processName);
+}
+
+
 void printProcessList()
 {
+    // Sort by processName (lexicographically)
+    qsort(activities, top, sizeof(Activities), compare_here);
+
     for (int i = 0; i < top; i++)
     {
         char state = get_process_state(activities[i].pid);
@@ -43,13 +54,15 @@ void signalHandler(int signum)
 
         for (int i = 0; i < top; i++)
         {
-            if (activities[i].pid != -1 && activities[i].fg_bg == 1)
+            if (activities[i].pid != -1 && activities[i].fg_bg == 1)//if the entry is valid and if the process is foreground
             {
                 kill(activities[i].pid, SIGINT);
             }
         }
     }
 }
+
+
 void signalHandler_z(int signum)
 {
     if (curr_running != -1)
@@ -58,7 +71,7 @@ void signalHandler_z(int signum)
         curr_running = -1;
     }
     else
-        printf("There is no process running currently\n");
+        printf("\nThere is no process running currently\n");
 }
 
 void cleanupAndExit()
@@ -125,7 +138,7 @@ int checkForFunctions(char *input, char **command)
 
 int main()
 {
-    signal(SIGINT, signalHandler);
+    signal(SIGINT, signalHandler);// library function (from <signal.h>) that wraps lower-level system calls like sigaction().
     signal(SIGTSTP, signalHandler_z);
     addAliases();
     char *input = (char *)malloc(sizeof(char) * buf_size);

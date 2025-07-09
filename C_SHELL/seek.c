@@ -61,10 +61,12 @@ void seek(char *input, char *home_dir)
     strcpy(final_DIR, home_dir);
     strcat(final_DIR, direct); // construct the directory in which we want to search
     int len = strlen(final_DIR);
-    int flag = 0, numDir = 0, numFiles = 0, numExec = 0; // numDir,numFiles,numExec-> num files of such type
+    int flag = 0, numDir = 0, numFiles = 0, numExec = 0; // numDir,numFiles,numExec-> num files of such type-counters to track how many matches were found
+
+
     // flag to denote whether we found a file of required name
 
-    seek_fun(filename, dir, files, exec, final_DIR, len, &flag, &numDir, &numFiles, &numExec);
+    seek_fun(filename, dir, files, exec, final_DIR, len, &flag, &numDir, &numFiles, &numExec);//the recursive function seek_fun() which does the actual searching.
 
     if (flag == 0)
         printf("\033[0;31m No match found! \033[0\n");
@@ -81,15 +83,21 @@ void seek_fun(char *filename, int dir, int files, int exec, char *directory, int
     }
     char eDirectory[buf_size] = "";
     char eFiles[buf_size] = "";
-    while ((d = readdir(Di)) != NULL)
+    while ((d = readdir(Di)) != NULL)//readdir()-Reads one entry at a time (returns dirent)
     {
         if (strcmp(d->d_name, ".") == 0 || strcmp(d->d_name, "..") == 0) // skip over hidden files
         {
             continue;
         }
+
+        //Build Full Path and Get File Metadata
         char filepath[1024];
         snprintf(filepath, sizeof(filepath), "%s/%s", directory, d->d_name); // construct path for every directory/file
+        
         struct stat fileStat;
+        
+        //stat() fills in a struct stat with information about the file specified by filepath. It retrieves metadata such as file size, type (file or directory), permissions, and timestamps.
+
 
         if (stat(filepath, &fileStat) < 0)
         {
@@ -101,7 +109,7 @@ void seek_fun(char *filename, int dir, int files, int exec, char *directory, int
             // if either d flag is present/ no flag and directory name matches
             if ((dir > 0 || (files == 0 && dir == 0)) && strcmp(d->d_name, filename) == 0)
             {
-                if (exec > 0 && access(filepath, X_OK) != 0)
+                if (exec > 0 && access(filepath, X_OK) != 0)//If -e is also provided, check if directory is executable.
                 {
                     printf("\033[0;31m Missing permissions for task!\033[0m\n");
                     closedir(Di);
@@ -119,13 +127,12 @@ void seek_fun(char *filename, int dir, int files, int exec, char *directory, int
             // since directory is present we will recurse for this directory again
             seek_fun(filename, dir, files, exec, filepath, home_len, flag, numDir, numFiles, numExec);
         }
-        else if (S_ISREG(fileStat.st_mode))
+        else if (S_ISREG(fileStat.st_mode))//if it is a regular file
         {
-            // it is a regular file
             // if file flag is there or no flag is there and is matching
-            if (((files > 0 || (files == 0 && dir == 0)) && (fileStat.st_mode & S_IXUSR)) && strcmp(d->d_name, filename) == 0)
+            //Exact match with executable permission
+            if (((files > 0 || (files == 0 && dir == 0)) && (fileStat.st_mode & S_IXUSR)) && strcmp(d->d_name, filename) == 0)//S_IXUSR is a constant (macro) that represents the "execute permission for the owner
             {
-
                 if (exec > 0 && access(filepath, R_OK) != 0)
                 {
                     printf("\033[0;31m Missing permissions for task!\033[0m\n");
@@ -137,6 +144,7 @@ void seek_fun(char *filename, int dir, int files, int exec, char *directory, int
                 printf("\033[0;32m%s\n\033[0m", filepath + home_len);
                 (*numExec)++;
             }
+            //Looser match using compare_s()
             else if ((files > 0 || (files == 0 && dir == 0)) && compare_s(d->d_name, filename))
             {
                 if (exec > 0 && access(filepath, R_OK) != 0)

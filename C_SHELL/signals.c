@@ -1,4 +1,6 @@
 #include "signals_.h"
+
+
 void getSignal(char *input)
 {
     int id = -1;
@@ -24,18 +26,17 @@ void getSignal(char *input)
         }
         token = strtok(NULL, " \t");
     }
-    // printf("S: %d I: %d\n", signal, id);
     executeSignal(id, signal);
 }
 void executeSignal(int id, int signal)
 {
     int flag = 0;
-    for (int i = 0; i < top; i++)
+    for (int i = 0; i < top; i++)//Loops through the activities[] array to check if the process exists.
     {
         if (activities[i].pid == id)
         {
             flag = 1;
-            signal = signal % 32;
+            signal = signal % 32;// only allow valid POSIX signal range
             kill(id, signal);
             if (signal == 9)
             {

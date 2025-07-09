@@ -40,9 +40,9 @@ void processRedirection(char *input, char *home_dir, char *previous_dir, char *l
 {
     trimWhitespaces(input);
     char *command = (char *)malloc(sizeof(char) * buf_size);
-    strcpy(command, input);
+    strcpy(command, input);//works on copy
     int copy_in = dup(0); // duplicate file descriptors of stdin, stdout
-    int copy_out = dup(1);
+    int copy_out = dup(1);//system call
 
     int fd_in = -1, fd_out = -1;
 
@@ -84,15 +84,13 @@ void processRedirection(char *input, char *home_dir, char *previous_dir, char *l
         }
     }
 
-    // Handle input redirection (<)
-    if (strstr(command, "<") != NULL)
+    if (strstr(command, "<") != NULL) // Handle input redirection (<)
     {
         char *filename_part = strstr(command, "<");
-        // filename_part[0] = '\0';
         filename_part += 1;
         trimWhitespaces(filename_part);
         char *filename = strtok(filename_part, " ;");
-        fd_in = open(filename, O_RDONLY); // open the file in read mode
+        fd_in = open(filename, O_RDONLY); // open the file in read mode-system call
         if (fd_in < 0)
         {
             perror("Input file opening failed");
@@ -119,7 +117,7 @@ void processRedirection(char *input, char *home_dir, char *previous_dir, char *l
         }
         else if (strncmp(command, "seek", 4) == 0)
         {
-            seek_color(command, home_dir);
+            (command, home_dir);
         }
         else if (strncmp(command, "reveal", 6) == 0)
         {

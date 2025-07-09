@@ -2,6 +2,10 @@
 #define FG_BG
 #include <stdio.h>
 #include "systemCommands.h"
+#include <signal.h>
+#include <unistd.h>
+#include <errno.h>
+#include <sys/wait.h>
 #include "activities.h"
 #include <stdlib.h>
 #include <string.h>

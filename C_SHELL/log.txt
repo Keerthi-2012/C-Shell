@@ -1,15 +1,15 @@
-sleep 5 &
-[A
-proclore
-proclore 301
-proclore 35970
-sleep 5
-sleep 5 &
-proclore
-proclore 35971
-proclore 37890
-seek HeaderFiles
-seek HeaderFiles Keerthi
-seek
-seek -e HeaderFiles
-hop ~
+hop
+revea -l
+reveal -l
+echo "Hello" | wc
+wc | echo "hello"
+hop Headerfiles
+cat < txt.cpp | wc | cat > text.cpp
+echo hello >> txt.cpp | wc >> text.cpp
+ls -l | grep ".c"
+ps aux | grep bash | sort > text.cpp
+cat text.cpp
+activities
+ping 69135 9
+ping 69135 47
+iMan sleep
