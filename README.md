@@ -119,4 +119,6 @@ This is a custom-built shell implemented in C that supports a variety of Unix-li
 
 ### Compile
 ```bash
-make
+gcc *.c -o c_shell
+```bash
+./c_shell
