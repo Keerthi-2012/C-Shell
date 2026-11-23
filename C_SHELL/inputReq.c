@@ -23,25 +23,19 @@ int processCommands(char *input)
         return 0;
 }
 // if command is "proclore id", returns if id exists or -1 otherwise
+
 int getProcloreID(char *command)
 {
-    char *token1 = (char *)malloc(sizeof(char) * buf_size);
-    token1 = strtok(command, " \t");
-    int i = 0;
-    int num = -1;
-    while (token1 != NULL)
-    {
-        if (i == 1)
-        {
-            num = atoi(token1);
-            break;
-        }
-        token1 = strtok(NULL, " \t");
-        i++;
-    }
-    free(token1);
-    return num;
+    char *token = strtok(command, " \t");
+
+    token = strtok(NULL, " \t");
+
+    if (token == NULL)
+        return -1;
+
+    return atoi(token);
 }
+
 
 int checkForAliases(char *input, char **modifiedInput)
 {

@@ -1,16 +1,8 @@
 #ifndef NETWORKING_H
 #define NETWORKING_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
+#define BUFFER_SIZE 4096
 
-#define buf_size 4096
-
-void fetch_man_page(char *command);
+void fetch_man_page(char *input);
 
 #endif

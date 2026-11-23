@@ -23,6 +23,8 @@ void print_The_Directory(char *home_dir)
     struct utsname os; // a struct used to store information about operating system and machine
     int x = 0;
     int flag = 0;
+    // The getlogin_r() function is a thread-safe, POSIX-compliant way to retrieve the login name 
+    //of the user associated with the current process's controlling terminal
     if (getlogin_r(user_name, buf_size) != 0)
     {
         char *env_user = getenv("USER");
@@ -33,6 +35,9 @@ void print_The_Directory(char *home_dir)
     } // gets the username logged into os and stores in user_name
     getcwd(dir, buf_size); // gets current working directory and stores in dir variable
     uname(&os);            // fills the details of os in os struct
+
+
+// getenv- Retrieves the value of an environment variable.
 
     char *filename = (char *)malloc(sizeof(char) * buf_size);
     strcpy(filename, home_dir);
